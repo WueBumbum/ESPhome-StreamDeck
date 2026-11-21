@@ -246,7 +246,7 @@ void StreamDeck::close_device_() {
 }
 }  // namespace esphome::streamdeck
 
-void StreamDeck::dump_config() {
-  ESP_LOGCONFIG(TAG, "StreamDeck:");
-  ESP_LOGCONFIG(TAG, "  Component initialized");
+void esphome::streamdeck::StreamDeck::dump_config() {
+  ESP_LOGCONFIG("streamdeck", "StreamDeck:");
+  ESP_LOGCONFIG("streamdeck", "  Component initialized");
 }
