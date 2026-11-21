@@ -1,4 +1,4 @@
-# ESPHome Stream Deck Module 6-Key – experimental proof of concept
+# ESPHome Stream Deck Module 6-Key – experimentelles Projekt
 
 **Status: source prototype; not yet compiled against a pinned ESPHome version and not hardware-tested.**
 
@@ -8,26 +8,26 @@ Expected behavior: on USB connection the first key displays a gray power symbol.
 
 ## Repository and installation
 
-1. Create a **public** GitHub repository named `esphome-streamdeck-poc` (without adding a README during creation).
-2. Upload **the contents of this folder** into the repository root, preserving `components/streamdeck_poc/`.
+1. Create a **public** GitHub repository named `ESPhome-StreamDeck` (without adding a README during creation).
+2. Upload **the contents of this folder** into the repository root, preserving `components/streamdeck/`.
 3. In `streamdeck.yaml`, replace `OWNER` with your GitHub account name. For initial experiments, `ref: main` and `refresh: 0s` are intentional.
 4. Copy `secrets.example.yaml` to `secrets.yaml` on the machine where ESPHome builds the firmware, fill in the Wi-Fi credentials, generate a 32-byte base64 encryption key, and choose OTA and fallback passwords. **Do not commit `secrets.yaml` to GitHub.**
 5. Copy `streamdeck.yaml` and `secrets.yaml` to the ESPHome Device Builder configuration folder, or build locally with ESPHome CLI. Use the UART USB-C port for flashing and serial logging.
 6. Compile, flash and inspect logs **before connecting the Stream Deck**. Connect the Stream Deck to the native USB-OTG port only after confirming 5 V VBUS is available. Many ESP32-S3 boards do not supply VBUS in host mode by themselves.
-7. The PoC uses the ESP-IDF USB host stack directly, not ESPHome's `usb_host:` component. Do not enable a second USB host manager concurrently.
+7. The Projekt uses the ESP-IDF USB host stack directly, not ESPHome's `usb_host:` component. Do not enable a second USB host manager concurrently.
 
 ## Source layout
 
 - `streamdeck.yaml`: example configuration that fetches this repository as an external component
-- `components/streamdeck_poc/__init__.py`: ESPHome integration and component registration
-- `components/streamdeck_poc/streamdeck_poc.h/.cpp`: experimental USB host, HID input and BMP output
+- `components/streamdeck/__init__.py`: ESPHome integration and component registration
+- `components/streamdeck/streamdeck.h/.cpp`: experimental USB host, HID input and BMP output
 - `secrets.example.yaml`: local credentials template
 
 ## Protocol
 
 Official Elgato documentation: https://docs.elgato.com/streamdeck/hid/mini/
 
-The PoC builds 80x80 24-bit BMP bytes in RAM (including a 54-byte header), rotates the image in software, and sends 1024-byte HID output reports with a 16-byte report header. Input report ID `0x01` reports six button states.
+The Projekt builds 80x80 24-bit BMP bytes in RAM (including a 54-byte header), rotates the image in software, and sends 1024-byte HID output reports with a 16-byte report header. Input report ID `0x01` reports six button states.
 
 ## Important limitations
 
@@ -40,4 +40,4 @@ The PoC builds 80x80 24-bit BMP bytes in RAM (including a 54-byte header), rotat
 
 ## Suggested test report
 
-Send the full ESPHome build error if compilation fails. If compilation succeeds, send boot logs including VID/PID, HID endpoint information, first image transfer result and key presses. This is an iterative hardware PoC, not a guaranteed ready-to-flash binary.
+Send the full ESPHome build error if compilation fails. If compilation succeeds, send boot logs including VID/PID, HID endpoint information, first image transfer result and key presses. This is an iterative hardware Projekt, not a guaranteed ready-to-flash binary.

@@ -4,9 +4,9 @@
 #include "usb/usb_host.h"
 #include <cstdint>
 
-namespace esphome::streamdeck_poc {
+namespace esphome::streamdeck {
 
-class StreamDeckPoC : public Component {
+class StreamDeck : public Component {
  public:
   void setup() override;
   void loop() override;
@@ -43,4 +43,4 @@ class StreamDeckPoC : public Component {
   uint8_t image_[19254]{};  // 54-byte BMP header + 80*80*3
 };
 
-}  // namespace esphome::streamdeck_poc
+}  // namespace esphome::streamdeck

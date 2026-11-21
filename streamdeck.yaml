@@ -1,10 +1,10 @@
-# Replace OWNER after creating the GitHub repository.
+# GitHub source for the ESPHome component.
 substitutions:
-  device_name: streamdeck-poc
+  device_name: streamdeck
 
 esphome:
   name: ${device_name}
-  friendly_name: Stream Deck PoC
+  friendly_name: Stream Deck
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -26,7 +26,7 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   ap:
-    ssid: StreamDeck-PoC-Fallback
+    ssid: StreamDeck-Fallback
     password: !secret fallback_password
 
 captive_portal:
@@ -42,10 +42,10 @@ ota:
 external_components:
   - source:
       type: git
-      url: https://github.com/OWNER/esphome-streamdeck-poc
+      url: https://github.com/WueBumbum/ESPhome-StreamDeck
       ref: main
-    components: [streamdeck_poc]
+    components: [streamdeck]
     refresh: 0s
 
-streamdeck_poc:
+streamdeck:
   id: streamdeck

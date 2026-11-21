@@ -1,4 +1,4 @@
-#include "streamdeck_poc.h"
+#include "streamdeck.h"
 #include "esphome/core/helpers.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -6,22 +6,22 @@
 #include <cstring>
 #include <algorithm>
 
-namespace esphome::streamdeck_poc {
-static const char *const TAG = "streamdeck_poc";
+namespace esphome::streamdeck {
+static const char *const TAG = "streamdeck";
 static constexpr uint16_t VID = 0x0FD9;
 static constexpr uint16_t PID = 0x00B8;
 static constexpr size_t BMP_BYTES = 54 + 80 * 80 * 3;
 static constexpr size_t HID_REPORT_BYTES = 1024;
 static constexpr size_t CHUNK_BYTES = 1008;
 
-void StreamDeckPoC::setup() {
+void StreamDeck::setup() {
   ESP_LOGI(TAG, "Starting USB host (experimental Stream Deck 6-Key Module driver)");
   xTaskCreatePinnedToCore(task_entry_, "deck_usb", 8192, this, 5, nullptr, 0);
 }
-void StreamDeckPoC::loop() {}
-void StreamDeckPoC::task_entry_(void *arg) { static_cast<StreamDeckPoC *>(arg)->task_(); }
+void StreamDeck::loop() {}
+void StreamDeck::task_entry_(void *arg) { static_cast<StreamDeck *>(arg)->task_(); }
 
-void StreamDeckPoC::task_() {
+void StreamDeck::task_() {
   usb_host_config_t host_cfg = {};
   host_cfg.skip_phy_setup = false;
   host_cfg.intr_flags = ESP_INTR_FLAG_LEVEL1;
@@ -52,13 +52,13 @@ void StreamDeckPoC::task_() {
   }
 }
 
-void StreamDeckPoC::client_event_(const usb_host_client_event_msg_t *msg, void *arg) {
-  auto *self = static_cast<StreamDeckPoC *>(arg);
+void StreamDeck::client_event_(const usb_host_client_event_msg_t *msg, void *arg) {
+  auto *self = static_cast<StreamDeck *>(arg);
   if (msg->event == USB_HOST_CLIENT_EVENT_NEW_DEV) self->on_device_(msg->new_dev.address);
   else if (msg->event == USB_HOST_CLIENT_EVENT_DEV_GONE) self->close_device_();
 }
 
-void StreamDeckPoC::on_device_(uint8_t address) {
+void StreamDeck::on_device_(uint8_t address) {
   if (device_) return;
   if (usb_host_device_open(client_, address, &device_) != ESP_OK) return;
   const usb_device_desc_t *dev = nullptr;
@@ -126,14 +126,14 @@ void StreamDeckPoC::on_device_(uint8_t address) {
   queue_input_();
 }
 
-void StreamDeckPoC::queue_input_() {
+void StreamDeck::queue_input_() {
   if (!connected_ || !input_) return;
   input_->num_bytes = std::max<size_t>(in_packet_, 65);
   esp_err_t err = usb_host_transfer_submit(input_);
   if (err != ESP_OK) ESP_LOGE(TAG, "Input submit: %s", esp_err_to_name(err));
 }
 
-void StreamDeckPoC::prepare_image_(bool enabled) {
+void StreamDeck::prepare_image_(bool enabled) {
   image_on_ = enabled;
   // Windows BMP, 80x80, bottom-up BGR24; rotate 90 degrees clockwise in the pixel map.
   std::memset(image_, 0, sizeof(image_));
@@ -166,7 +166,7 @@ void StreamDeckPoC::prepare_image_(bool enabled) {
   ESP_LOGI(TAG, "Key 1 image requested: %s", enabled ? "ON" : "OFF");
 }
 
-void StreamDeckPoC::queue_image_chunk_() {
+void StreamDeck::queue_image_chunk_() {
   if (!connected_ || !output_ || !image_pending_ || output_busy_) return;
   const size_t remaining = BMP_BYTES - image_offset_;
   const size_t count = std::min(remaining, CHUNK_BYTES);
@@ -197,10 +197,10 @@ void StreamDeckPoC::queue_image_chunk_() {
   }
 }
 
-void StreamDeckPoC::transfer_done_(usb_transfer_t *transfer) {
-  static_cast<StreamDeckPoC *>(transfer->context)->on_transfer_done_(transfer);
+void StreamDeck::transfer_done_(usb_transfer_t *transfer) {
+  static_cast<StreamDeck *>(transfer->context)->on_transfer_done_(transfer);
 }
-void StreamDeckPoC::on_transfer_done_(usb_transfer_t *transfer) {
+void StreamDeck::on_transfer_done_(usb_transfer_t *transfer) {
   if (transfer == input_) {
     if (transfer->status == USB_TRANSFER_STATUS_COMPLETED && transfer->actual_num_bytes >= 7) {
       const uint8_t *r = transfer->data_buffer;
@@ -226,12 +226,12 @@ void StreamDeckPoC::on_transfer_done_(usb_transfer_t *transfer) {
   }
 }
 
-void StreamDeckPoC::close_device_() {
+void StreamDeck::close_device_() {
   connected_ = false;
   image_pending_ = false;
   ESP_LOGW(TAG, "Stream Deck disconnected");
   // Transfers can still be pending when a device is unplugged; avoid freeing
-  // their buffers in this early experimental PoC. A later revision will add
+  // their buffers in this early experimental Projekt. A later revision will add
   // cancellation, endpoint halt and clean reconnect handling.
   if (device_) {
     if (ep_in_) usb_host_endpoint_halt(device_, ep_in_);
@@ -244,4 +244,4 @@ void StreamDeckPoC::close_device_() {
   ep_in_ = ep_out_ = 0;
   input_ = output_ = nullptr;
 }
-}  // namespace esphome::streamdeck_poc
+}  // namespace esphome::streamdeck
