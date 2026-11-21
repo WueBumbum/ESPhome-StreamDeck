@@ -41,6 +41,7 @@ class StreamDeck : public Component {
   size_t image_offset_{0};
   uint8_t chunk_index_{0};
   uint8_t image_[19254]{};  // 54-byte BMP header + 80*80*3
+  void dump_config() override;
 };
 
 }  // namespace esphome::streamdeck

@@ -245,3 +245,8 @@ void StreamDeck::close_device_() {
   input_ = output_ = nullptr;
 }
 }  // namespace esphome::streamdeck
+
+void StreamDeck::dump_config() {
+  ESP_LOGCONFIG(TAG, "StreamDeck:");
+  ESP_LOGCONFIG(TAG, "  Component initialized");
+}
